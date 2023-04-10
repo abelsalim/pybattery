@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "pybattery"
 version = "0.1.0"
-description = ""
-authors = ["abelsalim <abelcosta.ti@gmail.com>"]
+description = "Script notificador de bateria para desktops I3WM e similares"
+authors = ["abelsalim <abelsalim@proton.me>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
