@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pybattery"
+version = "0.1.0"
+description = ""
+authors = ["abelsalim <abelcosta.ti@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+plyer = "^2.1.0"
+psutil = "^5.9.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
