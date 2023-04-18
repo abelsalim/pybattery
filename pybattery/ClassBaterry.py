@@ -95,8 +95,9 @@ class BatteryCheckNotification(NotificationConditionalsForBattery):
     async def check_battery_low_and_high(self):
         self.update_percent()
 
-        if self._reference_battery != self._plugged:
-            await self.charger_watchdog()
+        match (self._plugged, self._reference_battery):
+            case tupla if tupla[0] != tupla[1]:
+                await self.charger_watchdog()
 
         match (self._plugged, self._battery):
             case (True, 100):
