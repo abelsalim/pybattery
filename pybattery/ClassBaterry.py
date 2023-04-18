@@ -33,6 +33,9 @@ class Battery(Notificacao):
     def update_percent(self):
         self._battery = sensors_battery().percent
 
+
+class BatteryScopeMethod(Battery):
+
     async def scope(self, photo, time=10):
         message = (
             f'Status: {self.plug_translation()}',
@@ -56,42 +59,52 @@ class Battery(Notificacao):
         await (scope if self._plugged else search)
         self._reference_battery = self._plugged
 
-    async def update_notified_full(self):
-        if self._notified_full:
-            await self.scope(CARREGANDO, 60)
 
-        if 100 in [self._battery, sensors_battery().percent]:
-            self._notified_full = False
-        elif not self._plugged:
-            self._notified_full = True
-        else:
-            self._notified_full = True
+class NotificationConditionalsForBattery(BatteryScopeMethod):
+
+    async def update_notified_full(self):
+        match self._notified_full:
+            case True:
+                await self.scope(CARREGANDO, 60)
+
+        match (self._plugged, self._battery, sensors_battery().percent):
+            case (_, 100, 100):
+                self._notified_full = False
+            case (False, _, _):
+                self._notified_full = True
+            case _:
+                self._notified_full = True
 
     async def update_notified_levels(self):
-        if self._notified_level_number != self._battery:
-            await self.search_variable()
-            self._notified_level_number = self._battery
-        elif isinstance(self._notified_level_number, int):
-            if self._notified_level_number < self._battery:
+        match self._notified_level_number:
+            case number if number != self._battery:
+                await self.search_variable()
+                self._notified_level_number = self._battery
+            case number if int and number < self._battery:
                 self._notified_level_number = None
+
+
+class FastNotification(NotificationConditionalsForBattery):
 
     async def fast_battery_notification(self):
         await self.search_variable()
 
+
+class BatteryCheckNotification(NotificationConditionalsForBattery):
+
     async def check_battery_low_and_high(self):
         self.update_percent()
-        print(f'plugged: {self._plugged}')
-        print(f'battery: {self._battery}')
-        print(f'método: {sensors_battery().percent}')
+
         if self._reference_battery != self._plugged:
             await self.charger_watchdog()
 
-        if self._battery == 100 and self._plugged:
-            await self.update_notified_full()
-        elif self._battery in NIVEIS and not self._plugged:
-            await self.update_notified_levels()
-        elif self._battery <= 15 and not self._plugged:
-            await self.update_notified_levels()
+        match (self._plugged, self._battery):
+            case (True, 100):
+                await self.update_notified_full()
+            case tupla if not tupla[0] and tupla[1] in NIVEIS:
+                await self.update_notified_levels()
+            case tupla if tupla[0] <= 15 and tupla[1]:
+                await self.update_notified_levels()
 
 
 if __name__ == '__main__':

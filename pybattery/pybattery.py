@@ -1,7 +1,7 @@
 import asyncio
 import argparse
-from ClassBaterry import Battery
 from constants import DESCRIPTION
+from ClassBaterry import Battery, BatteryCheckNotification, FastNotification
 
 parser = argparse.ArgumentParser(description=DESCRIPTION)
 parser.add_argument(
@@ -16,12 +16,15 @@ args = parser.parse_args()
 
 async def main():
     battery = Battery()
+    fast_notify = FastNotification()
+    check_battery = BatteryCheckNotification()
+
     if args.fast:
-        await battery.fast_battery_notification()
+        await fast_notify.fast_battery_notification()
     if args.check:
         while True:
             battery()
-            await battery.check_battery_low_and_high()
+            await check_battery.check_battery_low_and_high()
             await asyncio.sleep(1)
 
 
